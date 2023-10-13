@@ -8,6 +8,7 @@ public class BloomFilterFNV {
     private int bitsPerElement;
     private int numHashes;
     private int dataSize;
+    private int filterSize;
 
     public BloomFilterFNV(int setSize, int bitsPerElement) {
         this.setSize = setSize;
@@ -15,41 +16,43 @@ public class BloomFilterFNV {
         this.numHashes = (int) Math.ceil((Math.log(2) * bitsPerElement * setSize) / setSize);
         this.filter = new BitSet(setSize * bitsPerElement);
         this.dataSize = 0;
+        this.filterSize = (int) setSize * bitsPerElement;
     }
     
-    // This needs to be k hash functions 
-    // FNV-1a 64-bit hash function
+    // FNV 64-bit hash function
     public long fnvHash(String s) {
-        long hash = 0xcbf29ce484222325L;
-        for (char c : s.toLowerCase().toCharArray()) {
-            hash ^= c;
-            // Update the hash function to include 2^64
-            hash *= 0x100000001b3L;
+        long FNV64INIT = 95981039346656037L;
+    	long FNV64PRIME = 109951168211L;
+    	long hash = FNV64INIT;
+        for ( int c=0 ; c<s.length(); c++) {
+            hash ^= s.charAt(c);
+            hash = (hash * FNV64PRIME); // % (1L << 64)
         }
         return hash;
     }
 
     public void add(String s) {
+    	s = s.toLowerCase(); // to make the code case insensitive
         long hash = fnvHash(s);
-        for (int i = 0; i < numHashes; i++) {
-            int index = (int) (Math.abs(hash) % (setSize * bitsPerElement));
+        for (int k = 0; k < numHashes; k++) {
+            int index = (int) (Math.abs(hash) % filterSize);
             filter.set(index, true);
-            // Update the code for next hash function 
-            // Update to include k prime numbers. Store k prime numbers in a list 
-            // and then instead of >>32 multiple with the prime numbers to generate k hash functions
-            hash = hash >> 32; // Next hash
+            // Next hash function
+            hash = hash + (k);
+            //System.out.println("Hash: " + hash);
         }
         dataSize++;
     }
 
     public boolean appears(String s) {
+    	s = s.toLowerCase();
         long hash = fnvHash(s);
-        for (int i = 0; i < numHashes; i++) {
-            int index = (int) (Math.abs(hash) % (setSize * bitsPerElement));
+        for (int k = 0; k < numHashes; k++) {
+            int index = (int) (Math.abs(hash) % filterSize);
             if (!filter.get(index)) {
                 return false;
             }
-            hash = hash >> 32; // Next hash
+            hash = hash + (k);
         }
         return true;
     }
@@ -76,6 +79,7 @@ public class BloomFilterFNV {
         words.add("apple");
         words.add("banana");
         words.add("cherry");
+        words.add("Mango");
 
         for (String word : words) {
             bloomFilter.add(word);
@@ -87,5 +91,6 @@ public class BloomFilterFNV {
 
         System.out.println("Word 'apple' appears: " + bloomFilter.appears("apple"));
         System.out.println("Word 'orange' appears: " + bloomFilter.appears("orange"));
+        System.out.println("Word 'mango' appears: " + bloomFilter.appears("Mango"));
     }
 }
