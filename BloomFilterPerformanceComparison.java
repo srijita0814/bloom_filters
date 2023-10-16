@@ -2,9 +2,9 @@ import java.util.*;
 
 public class BloomFilterPerformanceComparison {
     public static void main(String[] args) {
-        int setSize = 10000;
+        int setSize = 100000;
         int bitsPerElement = 10;
-        int numTests = 1000; // Number of test strings
+        int numTests = 10000; // Number of test strings
 
         // Create a random set of strings
         Set<String> randomStrings = new HashSet<>();
@@ -17,7 +17,7 @@ public class BloomFilterPerformanceComparison {
         BloomFilterFNV fnvFilter = new BloomFilterFNV(setSize, bitsPerElement);
         BloomFilterRan ranFilter = new BloomFilterRan(setSize, bitsPerElement);
         BloomFilterRanPlus ranPlusFilter = new BloomFilterRanPlus(setSize, bitsPerElement);
-        MultiMultiBloomFilter multiMultiFilter = new MultiMultiBloomFilter(setSize, bitsPerElement, 3);
+        MultiMultiBloomFilter multiMultiFilter = new MultiMultiBloomFilter(setSize, bitsPerElement);
 
         testBloomFilter(fnvFilter, randomStrings, numTests);
         testBloomFilter(ranFilter, randomStrings, numTests);
@@ -26,6 +26,7 @@ public class BloomFilterPerformanceComparison {
     }
 
     // Generate a random string of a given length
+    // Need to update code here to include numbers too and also make the strings variable length
     private static String generateRandomString(Random random, int length) {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         StringBuilder stringBuilder = new StringBuilder(length);
@@ -38,15 +39,19 @@ public class BloomFilterPerformanceComparison {
     // Test BloomFilterFNV for false positives
     private static void testBloomFilter(BloomFilterFNV bloomFilter, Set<String> randomStrings, int numTests) {
         int falsePositives = 0;
-
+        
+        for (String name : randomStrings) {
+            bloomFilter.add(name);
+        }
+        
         for (int i = 0; i < numTests; i++) {
-            String testString = generateRandomString(new Random(), 10);
+            String testString = generateRandomString(new Random(), 20);
             if (!randomStrings.contains(testString) && bloomFilter.appears(testString)) {
                 falsePositives++;
             }
         }
 
-        double falsePositiveRate = (double) falsePositives / numTests;
+        float falsePositiveRate = (float) falsePositives / numTests;
         System.out.println(bloomFilter.getClass().getSimpleName() + " False Positives: " + falsePositives);
         System.out.println(bloomFilter.getClass().getSimpleName() + " False Positive Rate: " + falsePositiveRate);
     }
@@ -54,6 +59,10 @@ public class BloomFilterPerformanceComparison {
     // Test BloomFilterRan for false positives
     private static void testBloomFilter(BloomFilterRan bloomFilter, Set<String> randomStrings, int numTests) {
         int falsePositives = 0;
+        
+        for (String name : randomStrings) {
+            bloomFilter.add(name);
+        }
 
         for (int i = 0; i < numTests; i++) {
             String testString = generateRandomString(new Random(), 10);
@@ -70,6 +79,10 @@ public class BloomFilterPerformanceComparison {
     // Test BloomFilterRanPlus for false positives
     private static void testBloomFilter(BloomFilterRanPlus bloomFilter, Set<String> randomStrings, int numTests) {
         int falsePositives = 0;
+        
+        for (String name : randomStrings) {
+            bloomFilter.add(name);
+        }
 
         for (int i = 0; i < numTests; i++) {
             String testString = generateRandomString(new Random(), 10);
@@ -86,6 +99,10 @@ public class BloomFilterPerformanceComparison {
     // Test MultiMultiBloomFilter for false positives
     private static void testMultiMultiBloomFilter(MultiMultiBloomFilter bloomFilter, Set<String> randomStrings, int numTests) {
         int falsePositives = 0;
+        
+        for (String name : randomStrings) {
+            bloomFilter.add(name);
+        }
 
         for (int i = 0; i < numTests; i++) {
             String testString = generateRandomString(new Random(), 10);
@@ -98,4 +115,5 @@ public class BloomFilterPerformanceComparison {
         System.out.println(bloomFilter.getClass().getSimpleName() + " False Positives: " + falsePositives);
         System.out.println(bloomFilter.getClass().getSimpleName() + " False Positive Rate: " + falsePositiveRate);
     }
+
 }
