@@ -61,18 +61,8 @@ public class BloomFilterRanPlus {
         return true;
     }
     
-    public static long convertStringToLong(String input) {
-        long result = 0L;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            result = (result * 128L) + (long) c; // Use 128 as the base for combining ASCII values
-        }
-        return result;
-    }
- 
-    
     public int randomHashFunction(String s, int hashIndex) {
-    	long xvalue = convertStringToLong(s);
+    	int xvalue = s.hashCode();
         long hash = (hashCoeffA[hashIndex] * xvalue * xvalue + hashCoeffB[hashIndex] * xvalue + hashCoeffC[hashIndex]) % primeP;
         return (int) Math.abs(hash);
     }
