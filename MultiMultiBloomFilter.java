@@ -11,23 +11,29 @@ public class MultiMultiBloomFilter {
     private int[] hashCoeffA;
     private int[] hashCoeffB;
     private int[] hashCoeffC;
+    private int numFilters;
 
-    public MultiMultiBloomFilter(int setSize, int bitsPerElement, int numArrays) {
+    public MultiMultiBloomFilter(int setSize, int bitsPerElement) {
         this.setSize = setSize;
         this.bitsPerElement = bitsPerElement;
         this.numHashes = (int) Math.ceil((Math.log(2) * bitsPerElement * setSize) / setSize);
         this.dataSize = 0;
-        this.filterArrays = new ArrayList<>(numArrays);
+        this.numFilters = (int) Math.ceil((Math.log(2) * bitsPerElement * setSize) / setSize);
+        this.filterArrays = new ArrayList<>(numFilters);
         this.random = new Random();
-        this.primeP = generatePrime(bitsPerElement + 1); // Slightly larger than bitsPerElement
+        this.primeP = generatePrime((setSize * bitsPerElement) + 1); // Slightly larger than bitsPerElement
         this.hashCoeffA = new int[numHashes];
         this.hashCoeffB = new int[numHashes];
         this.hashCoeffC = new int[numHashes];
 
-        for (int i = 0; i < numArrays; i++) {
+//        for (int i = 0; i < numArrays; i++) {
+//            filterArrays.add(new BitSet(setSize));
+//        }
+        for (int i = 0; i < numFilters; i++) {
             filterArrays.add(new BitSet(setSize));
         }
 
+        
         for (int i = 0; i < numHashes; i++) {
             hashCoeffA[i] = random.nextInt(primeP);
             hashCoeffB[i] = random.nextInt(primeP);
@@ -69,23 +75,29 @@ public class MultiMultiBloomFilter {
     }
 
     public void add(String s) {
+    	s = s.toLowerCase(); // to make the code case insensitive
         for (int i = 0; i < numHashes; i++) {
             int index = randomHashFunction(s, i);
-            for (int j = 0; j < filterArrays.size(); j++) {
-                filterArrays.get(j).set(index, true);
-            }
+//            for (int j = 0; j < filterArrays.size(); j++) {
+//                filterArrays.get(j).set(index, true);
+//            }
+            filterArrays.get(i).set(index, true);
         }
         dataSize++;
     }
 
     public boolean appears(String s) {
+    	s = s.toLowerCase(); // to make the code case insensitive
         for (int i = 0; i < numHashes; i++) {
             int index = randomHashFunction(s, i);
-            for (int j = 0; j < filterArrays.size(); j++) {
-                if (!filterArrays.get(j).get(index)) {
-                    return false;
-                }
-            }
+//            for (int j = 0; j < filterArrays.size(); j++) {
+//                if (!filterArrays.get(j).get(index)) {
+//                    return false;
+//                }
+//            }
+            if (!filterArrays.get(i).get(index)) {
+	            return false;
+	        }
         }
         return true;
     }
@@ -107,13 +119,12 @@ public class MultiMultiBloomFilter {
     }
 
     public static void main(String[] args) {
-    	// Number of hash functions = number of filters
-    	// Update code to have k filters instead of one n*k size filter  
-        MultiMultiBloomFilter bloomFilter = new MultiMultiBloomFilter(10000, 10, 3);
+    	MultiMultiBloomFilter bloomFilter = new MultiMultiBloomFilter(10000, 10);
         Set<String> words = new HashSet<>();
         words.add("apple");
         words.add("banana");
         words.add("cherry");
+        words.add("Mango");
 
         for (String word : words) {
             bloomFilter.add(word);
@@ -125,5 +136,6 @@ public class MultiMultiBloomFilter {
 
         System.out.println("Word 'apple' appears: " + bloomFilter.appears("apple"));
         System.out.println("Word 'orange' appears: " + bloomFilter.appears("orange"));
+        System.out.println("Word 'mango' appears: " + bloomFilter.appears("Mango"));
     }
 }
