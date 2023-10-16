@@ -23,7 +23,7 @@ public class BloomFilterRanPlus {
         this.filter = new BitSet(setSize * bitsPerElement);
         this.dataSize = 0;
         this.random = new Random();
-        this.primeP = generatePrime(bitsPerElement + 1); // Slightly larger than bitsPerElement
+        this.primeP = generatePrime(bitsPerElement * setSize + 1); // Slightly larger than bitsPerElement
         this.hashCoeffA = new int[numHashes];
         this.hashCoeffB = new int[numHashes];
         this.hashCoeffC = new int[numHashes];
@@ -60,15 +60,25 @@ public class BloomFilterRanPlus {
         }
         return true;
     }
-
-    private int randomHashFunction(String s, int hashIndex) {
-    	// Update the value of x same as BloomFilterRan
-        int x = s.hashCode();
-        int hash = (hashCoeffA[hashIndex] * x * x + hashCoeffB[hashIndex] * x + hashCoeffC[hashIndex]) % primeP;
-        return Math.abs(hash % (setSize * bitsPerElement));
+    
+    public static long convertStringToLong(String input) {
+        long result = 0L;
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            result = (result * 128L) + (long) c; // Use 128 as the base for combining ASCII values
+        }
+        return result;
+    }
+ 
+    
+    public int randomHashFunction(String s, int hashIndex) {
+    	long xvalue = convertStringToLong(s);
+        long hash = (hashCoeffA[hashIndex] * xvalue * xvalue + hashCoeffB[hashIndex] * xvalue + hashCoeffC[hashIndex]) % primeP;
+        return (int) Math.abs(hash);
     }
 
     public void add(String s) {
+    	s = s.toLowerCase();
         for (int i = 0; i < numHashes; i++) {
             int index = randomHashFunction(s, i);
             filter.set(index, true);
@@ -77,6 +87,7 @@ public class BloomFilterRanPlus {
     }
 
     public boolean appears(String s) {
+    	s = s.toLowerCase();
         for (int i = 0; i < numHashes; i++) {
             int index = randomHashFunction(s, i);
             if (!filter.get(index)) {
@@ -108,6 +119,7 @@ public class BloomFilterRanPlus {
         words.add("apple");
         words.add("banana");
         words.add("cherry");
+        words.add("Mango");
 
         for (String word : words) {
             bloomFilter.add(word);
@@ -119,6 +131,7 @@ public class BloomFilterRanPlus {
 
         System.out.println("Word 'apple' appears: " + bloomFilter.appears("apple"));
         System.out.println("Word 'orange' appears: " + bloomFilter.appears("orange"));
+        System.out.println("Word 'mango' appears: " + bloomFilter.appears("Mango"));
     }
 }
 

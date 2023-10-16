@@ -21,8 +21,7 @@ public class BloomFilterRan {
         this.filter = new BitSet(setSize * bitsPerElement);
         this.dataSize = 0;
         this.random = new Random();
-        // Update this - needs to be M not bitsPerElement
-        this.primeP = generatePrime(bitsPerElement + 1); // Slightly larger than bitsPerElement
+        this.primeP = generatePrime(bitsPerElement * setSize + 1); // Slightly larger than M
         this.hashCoeffA = new int[numHashes];
         this.hashCoeffB = new int[numHashes];
 
@@ -32,7 +31,7 @@ public class BloomFilterRan {
         }
     }
 
-    private int generatePrime(int min) {
+    public int generatePrime(int min) {
         int prime = min;
         while (!isPrime(prime)) {
             prime++;
@@ -40,7 +39,7 @@ public class BloomFilterRan {
         return prime;
     }
 
-    private boolean isPrime(int n) {
+    public boolean isPrime(int n) {
         if (n <= 1) {
             return false;
         }
@@ -57,15 +56,25 @@ public class BloomFilterRan {
         }
         return true;
     }
-
-    private int randomHashFunction(String s, int hashIndex) {
-    	// Update the hashCode part. Need to use a function that we create
-    	// One example is following the FNVHash and use character hashing (ChatGPT)
-        int hash = (hashCoeffA[hashIndex] * s.hashCode() + hashCoeffB[hashIndex]) % primeP;
-        return Math.abs(hash % (setSize * bitsPerElement));
+    
+    
+    public static long convertStringToLong(String input) {
+        long result = 0L;
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            result = (result * 128L) + (long) c; // Use 128 as the base for combining ASCII values
+        }
+        return result;
+    }
+    
+    
+    public int randomHashFunction(String s, int hashIndex) {
+        long hash = (hashCoeffA[hashIndex] * convertStringToLong(s) + hashCoeffB[hashIndex]) % primeP;
+        return (int) Math.abs(hash);
     }
 
     public void add(String s) {
+    	s = s.toLowerCase();
         for (int i = 0; i < numHashes; i++) {
             int index = randomHashFunction(s, i);
             filter.set(index, true);
@@ -74,6 +83,7 @@ public class BloomFilterRan {
     }
 
     public boolean appears(String s) {
+    	s = s.toLowerCase();
         for (int i = 0; i < numHashes; i++) {
             int index = randomHashFunction(s, i);
             if (!filter.get(index)) {
@@ -105,6 +115,7 @@ public class BloomFilterRan {
         words.add("apple");
         words.add("banana");
         words.add("cherry");
+        words.add("Mango");
 
         for (String word : words) {
             bloomFilter.add(word);
@@ -116,5 +127,6 @@ public class BloomFilterRan {
 
         System.out.println("Word 'apple' appears: " + bloomFilter.appears("apple"));
         System.out.println("Word 'orange' appears: " + bloomFilter.appears("orange"));
+        System.out.println("Word 'mango' appears: " + bloomFilter.appears("Mango"));
     }
 }
