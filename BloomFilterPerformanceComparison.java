@@ -22,7 +22,8 @@ public class BloomFilterPerformanceComparison {
         testBloomFilter(fnvFilter, randomStrings, numTests);
         testBloomFilter(ranFilter, randomStrings, numTests);
         testBloomFilter(ranPlusFilter, randomStrings, numTests);
-        testMultiMultiBloomFilter(multiMultiFilter, randomStrings, numTests);
+        //testMultiMultiBloomFilter(multiMultiFilter, randomStrings, numTests);
+        testBloomFilter(multiMultiFilter, randomStrings, numTests);
     }
 
     // Generate a random string of a given length
@@ -97,7 +98,26 @@ public class BloomFilterPerformanceComparison {
     }
 
     // Test MultiMultiBloomFilter for false positives
-    private static void testMultiMultiBloomFilter(MultiMultiBloomFilter bloomFilter, Set<String> randomStrings, int numTests) {
+//    private static void testMultiMultiBloomFilter(MultiMultiBloomFilter bloomFilter, Set<String> randomStrings, int numTests) {
+//        int falsePositives = 0;
+//        
+//        for (String name : randomStrings) {
+//            bloomFilter.add(name);
+//        }
+//
+//        for (int i = 0; i < numTests; i++) {
+//            String testString = generateRandomString(new Random(), 10);
+//            if (!randomStrings.contains(testString) && bloomFilter.appears(testString)) {
+//                falsePositives++;
+//            }
+//        }
+//
+//        double falsePositiveRate = (double) falsePositives / numTests;
+//        System.out.println(bloomFilter.getClass().getSimpleName() + " False Positives: " + falsePositives);
+//        System.out.println(bloomFilter.getClass().getSimpleName() + " False Positive Rate: " + falsePositiveRate);
+//    }
+    
+    private static void testBloomFilter(MultiMultiBloomFilter bloomFilter, Set<String> randomStrings, int numTests) {
         int falsePositives = 0;
         
         for (String name : randomStrings) {
