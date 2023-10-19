@@ -23,7 +23,7 @@ public class BloomFilterRanPlus {
         this.filter = new BitSet(setSize * bitsPerElement);
         this.dataSize = 0;
         this.random = new Random();
-        this.primeP = generatePrime(bitsPerElement * setSize + 1); // Slightly larger than bitsPerElement
+        this.primeP = generatePrime(bitsPerElement * setSize + 1); 
         this.hashCoeffA = new int[numHashes];
         this.hashCoeffB = new int[numHashes];
         this.hashCoeffC = new int[numHashes];
@@ -104,7 +104,7 @@ public class BloomFilterRanPlus {
     }
 
     public static void main(String[] args) {
-        BloomFilterRanPlus bloomFilter = new BloomFilterRanPlus(10000, 10);
+        BloomFilterRanPlus bloomFilter = new BloomFilterRanPlus(10,8);
         Set<String> words = new HashSet<>();
         words.add("apple");
         words.add("banana");

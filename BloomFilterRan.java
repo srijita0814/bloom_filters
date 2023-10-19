@@ -21,7 +21,7 @@ public class BloomFilterRan {
         this.filter = new BitSet(setSize * bitsPerElement);
         this.dataSize = 0;
         this.random = new Random();
-        this.primeP = generatePrime(bitsPerElement * setSize + 1); // Slightly larger than M
+        this.primeP = generatePrime(bitsPerElement * setSize + 1); 
         this.hashCoeffA = new int[numHashes];
         this.hashCoeffB = new int[numHashes];
 
@@ -100,7 +100,7 @@ public class BloomFilterRan {
     }
 
     public static void main(String[] args) {
-        BloomFilterRan bloomFilter = new BloomFilterRan(10000, 10);
+        BloomFilterRan bloomFilter = new BloomFilterRan(10,8);
         Set<String> words = new HashSet<>();
         words.add("apple");
         words.add("banana");

@@ -1,5 +1,6 @@
 import java.util.BitSet;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public class BloomFilterFNV {
@@ -26,7 +27,7 @@ public class BloomFilterFNV {
     	long hash = FNV64INIT;
         for ( int c=0 ; c<s.length(); c++) {
             hash ^= s.charAt(c);
-            hash = (hash * FNV64PRIME); // % (1L << 64)
+            hash = (hash * FNV64PRIME); 
         }
         return hash;
     }
@@ -38,7 +39,7 @@ public class BloomFilterFNV {
             int index = (int) (Math.abs(hash) % filterSize);
             filter.set(index, true);
             // Next hash function
-            hash = hash + (k);
+            hash = hash + k;
             //System.out.println("Hash: " + hash);
         }
         dataSize++;
@@ -74,13 +75,13 @@ public class BloomFilterFNV {
     }
 
     public static void main(String[] args) {
-        BloomFilterFNV bloomFilter = new BloomFilterFNV(10000, 10);
+        BloomFilterFNV bloomFilter = new BloomFilterFNV(10,8);
         Set<String> words = new HashSet<>();
         words.add("apple");
         words.add("banana");
         words.add("cherry");
         words.add("Mango");
-
+        
         for (String word : words) {
             bloomFilter.add(word);
         }

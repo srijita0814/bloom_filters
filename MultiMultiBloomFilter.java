@@ -10,7 +10,7 @@ public class MultiMultiBloomFilter {
     private int primeP;
     private int[] hashCoeffA;
     private int[] hashCoeffB;
-    private int[] hashCoeffC;
+    //private int[] hashCoeffC;
     private int numFilters;
 
     public MultiMultiBloomFilter(int setSize, int bitsPerElement) {
@@ -21,14 +21,11 @@ public class MultiMultiBloomFilter {
         this.numFilters = (int) Math.ceil((Math.log(2) * bitsPerElement * setSize) / setSize);
         this.filterArrays = new ArrayList<>(numFilters);
         this.random = new Random();
-        this.primeP = generatePrime((setSize * bitsPerElement) + 1); // Slightly larger than bitsPerElement
+        this.primeP = generatePrime((setSize * bitsPerElement) + 1); 
         this.hashCoeffA = new int[numHashes];
         this.hashCoeffB = new int[numHashes];
-        this.hashCoeffC = new int[numHashes];
+        //this.hashCoeffC = new int[numHashes];
 
-//        for (int i = 0; i < numArrays; i++) {
-//            filterArrays.add(new BitSet(setSize));
-//        }
         for (int i = 0; i < numFilters; i++) {
             filterArrays.add(new BitSet(setSize));
         }
@@ -37,11 +34,11 @@ public class MultiMultiBloomFilter {
         for (int i = 0; i < numHashes; i++) {
             hashCoeffA[i] = random.nextInt(primeP);
             hashCoeffB[i] = random.nextInt(primeP);
-            hashCoeffC[i] = random.nextInt(primeP);
+            //hashCoeffC[i] = random.nextInt(primeP);
         }
     }
 
-    private int generatePrime(int min) {
+    public int generatePrime(int min) {
         int prime = min;
         while (!isPrime(prime)) {
             prime++;
@@ -49,7 +46,7 @@ public class MultiMultiBloomFilter {
         return prime;
     }
 
-    private boolean isPrime(int n) {
+    public boolean isPrime(int n) {
         if (n <= 1) {
             return false;
         }
@@ -68,19 +65,16 @@ public class MultiMultiBloomFilter {
     }
 
     private int randomHashFunction(String s, int hashIndex) {
-    	// Update value of x
-        int x = s.hashCode();
-        int hash = (hashCoeffA[hashIndex] * x * x + hashCoeffB[hashIndex] * x + hashCoeffC[hashIndex]) % primeP;
-        return Math.abs(hash % setSize);
+    	int x = s.hashCode();
+        long hash = (hashCoeffA[hashIndex] * x + hashCoeffB[hashIndex]) % primeP;
+        
+        return (int) Math.abs(hash % setSize);
     }
 
     public void add(String s) {
     	s = s.toLowerCase(); // to make the code case insensitive
         for (int i = 0; i < numHashes; i++) {
-            int index = randomHashFunction(s, i);
-//            for (int j = 0; j < filterArrays.size(); j++) {
-//                filterArrays.get(j).set(index, true);
-//            }
+        	int index = randomHashFunction(s, i);
             filterArrays.get(i).set(index, true);
         }
         dataSize++;
@@ -90,12 +84,7 @@ public class MultiMultiBloomFilter {
     	s = s.toLowerCase(); // to make the code case insensitive
         for (int i = 0; i < numHashes; i++) {
             int index = randomHashFunction(s, i);
-//            for (int j = 0; j < filterArrays.size(); j++) {
-//                if (!filterArrays.get(j).get(index)) {
-//                    return false;
-//                }
-//            }
-            if (!filterArrays.get(i).get(index)) {
+        	if (!filterArrays.get(i).get(index)) {
 	            return false;
 	        }
         }
@@ -119,7 +108,7 @@ public class MultiMultiBloomFilter {
     }
 
     public static void main(String[] args) {
-    	MultiMultiBloomFilter bloomFilter = new MultiMultiBloomFilter(10000, 10);
+    	MultiMultiBloomFilter bloomFilter = new MultiMultiBloomFilter(10, 8);
         Set<String> words = new HashSet<>();
         words.add("apple");
         words.add("banana");
