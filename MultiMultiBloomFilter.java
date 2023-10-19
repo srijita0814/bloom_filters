@@ -6,12 +6,8 @@ public class MultiMultiBloomFilter {
     private int numHashes;
     private int dataSize;
     private List<BitSet> filterArrays;
-    private Random random;
-    private int primeP;
-    private int[] hashCoeffA;
-    private int[] hashCoeffB;
-    private int[] hashCoeffC;
     private int numFilters;
+    private int filterSize;
 
     public MultiMultiBloomFilter(int setSize, int bitsPerElement) {
         this.setSize = setSize;
@@ -20,76 +16,50 @@ public class MultiMultiBloomFilter {
         this.dataSize = 0;
         this.numFilters = (int) Math.ceil((Math.log(2) * bitsPerElement * setSize) / setSize);
         this.filterArrays = new ArrayList<>(numFilters);
-        this.random = new Random();
-        this.primeP = generatePrime((setSize * bitsPerElement) + 1); // Slightly larger than bitsPerElement
-        this.hashCoeffA = new int[numHashes];
-        this.hashCoeffB = new int[numHashes];
-        this.hashCoeffC = new int[numHashes];
+        this.filterSize = (int) setSize * bitsPerElement;
 
-//        for (int i = 0; i < numArrays; i++) {
-//            filterArrays.add(new BitSet(setSize));
-//        }
         for (int i = 0; i < numFilters; i++) {
             filterArrays.add(new BitSet(setSize));
         }
 
-        
-        for (int i = 0; i < numHashes; i++) {
-            hashCoeffA[i] = random.nextInt(primeP);
-            hashCoeffB[i] = random.nextInt(primeP);
-            hashCoeffC[i] = random.nextInt(primeP);
+    }
+    
+ // FNV 64-bit hash function
+    public long fnvHash(String s) {
+        long FNV64INIT = 95981039346656037L;
+    	long FNV64PRIME = 109951168211L;
+    	long hash = FNV64INIT;
+        for ( int c=0 ; c<s.length(); c++) {
+            hash ^= s.charAt(c);
+            hash = (hash * FNV64PRIME); // % (1L << 64)
         }
+        //System.out.println("Hash:: " + hash);
+        return hash;
     }
 
-    private int generatePrime(int min) {
-        int prime = min;
-        while (!isPrime(prime)) {
-            prime++;
-        }
-        return prime;
-    }
 
-    private boolean isPrime(int n) {
-        if (n <= 1) {
-            return false;
-        }
-        if (n <= 3) {
-            return true;
-        }
-        if (n % 2 == 0 || n % 3 == 0) {
-            return false;
-        }
-        for (int i = 5; i * i <= n; i += 6) {
-            if (n % i == 0 || n % (i + 2) == 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private int randomHashFunction(String s, int hashIndex) {
-    	// Update value of x
-        int x = s.hashCode();
-        int hash = (hashCoeffA[hashIndex] * x * x + hashCoeffB[hashIndex] * x + hashCoeffC[hashIndex]) % primeP;
-        return Math.abs(hash % setSize);
-    }
 
     public void add(String s) {
     	s = s.toLowerCase(); // to make the code case insensitive
+    	long hash = fnvHash(s);
         for (int i = 0; i < numHashes; i++) {
-            int index = randomHashFunction(s, i);
+        	int index = (int) (Math.abs(hash) % filterSize);
+            //int index = randomHashFunction(s, i);
 //            for (int j = 0; j < filterArrays.size(); j++) {
 //                filterArrays.get(j).set(index, true);
 //            }
             filterArrays.get(i).set(index, true);
+            hash = hash + (i);
         }
         dataSize++;
     }
 
     public boolean appears(String s) {
     	s = s.toLowerCase(); // to make the code case insensitive
+    	long hash = fnvHash(s);
         for (int i = 0; i < numHashes; i++) {
-            int index = randomHashFunction(s, i);
+        	int index = (int) (Math.abs(hash) % filterSize);
+            //int index = randomHashFunction(s, i);
 //            for (int j = 0; j < filterArrays.size(); j++) {
 //                if (!filterArrays.get(j).get(index)) {
 //                    return false;
@@ -98,6 +68,7 @@ public class MultiMultiBloomFilter {
             if (!filterArrays.get(i).get(index)) {
 	            return false;
 	        }
+            hash = hash + (i);
         }
         return true;
     }
