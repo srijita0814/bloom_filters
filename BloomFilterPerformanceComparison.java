@@ -2,7 +2,7 @@ import java.util.*;
 
 public class BloomFilterPerformanceComparison {
     public static void main(String[] args) {
-        int setSize = 10000;
+        int setSize = 100000;
         int bitsPerElement = 10;
         int numTests = 10000; // Number of test strings
 

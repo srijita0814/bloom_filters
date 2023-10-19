@@ -4,7 +4,7 @@ import java.util.Set;
 
 public class BloomFilterFNV {
     private BitSet filter;
-    private int setSize;
+    private int setSize; 
     private int bitsPerElement;
     private int numHashes;
     private int dataSize;
@@ -18,7 +18,7 @@ public class BloomFilterFNV {
         this.dataSize = 0;
         this.filterSize = (int) setSize * bitsPerElement;
     }
-
+    
     // FNV 64-bit hash function
     public long fnvHash(String s) {
         long FNV64INIT = 95981039346656037L;
@@ -28,7 +28,6 @@ public class BloomFilterFNV {
             hash ^= s.charAt(c);
             hash = (hash * FNV64PRIME); // % (1L << 64)
         }
-        //System.out.println("Hash:: " + hash);
         return hash;
     }
 
@@ -80,15 +79,11 @@ public class BloomFilterFNV {
         words.add("apple");
         words.add("banana");
         words.add("cherry");
-        words.add("apple");
+        words.add("Mango");
 
         for (String word : words) {
             bloomFilter.add(word);
         }
-
-//        for (int i=0 ; i<30 ; i++) {
-//        	System.out.println(bloomFilter.getBit(i));
-//        }
 
         System.out.println("Bloom Filter Size: " + bloomFilter.filterSize());
         System.out.println("Number of Hash Functions: " + bloomFilter.numHashes());
@@ -96,6 +91,6 @@ public class BloomFilterFNV {
 
         System.out.println("Word 'apple' appears: " + bloomFilter.appears("apple"));
         System.out.println("Word 'orange' appears: " + bloomFilter.appears("orange"));
-        System.out.println("Word 'apple' appears: " + bloomFilter.appears("apple"));
+        System.out.println("Word 'mango' appears: " + bloomFilter.appears("Mango"));
     }
 }
