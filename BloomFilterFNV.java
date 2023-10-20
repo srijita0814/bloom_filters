@@ -39,10 +39,11 @@ public class BloomFilterFNV {
             int index = (int) (Math.abs(hash) % filterSize);
             filter.set(index, true);
             // Create a different hash function
-            s = generateShiftedString(s, k);
-            hash = fnvHash(s);
+            String st = generateShiftedString(s, k);
+            hash = fnvHash(st);
             //System.out.println("k: " + k);
             //System.out.println("hash: " + hash);
+            //System.out.println("shfit: " + st);
         }
         dataSize++;
     }
@@ -72,7 +73,7 @@ public class BloomFilterFNV {
         }
         if (shift > 0) {
             // Append the remaining characters from the original string
-            shifted.append(s, 0, shift);
+            shifted.append(s, shift-1, shift);
         }
         return shifted.toString();
     }
