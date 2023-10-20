@@ -31,32 +31,52 @@ public class BloomFilterFNV {
         }
         return hash;
     }
-
+  
     public void add(String s) {
-    	s = s.toLowerCase(); // to make the code case insensitive
+        s = s.toLowerCase();
         long hash = fnvHash(s);
         for (int k = 0; k < numHashes; k++) {
             int index = (int) (Math.abs(hash) % filterSize);
             filter.set(index, true);
-            // Next hash function
-            hash = hash + k;
-            //System.out.println("Hash: " + hash);
+            // Create a different hash function
+            s = generateShiftedString(s, k);
+            hash = fnvHash(s);
+            //System.out.println("k: " + k);
+            //System.out.println("hash: " + hash);
         }
         dataSize++;
     }
-
+    
     public boolean appears(String s) {
-    	s = s.toLowerCase();
+        s = s.toLowerCase();
         long hash = fnvHash(s);
         for (int k = 0; k < numHashes; k++) {
             int index = (int) (Math.abs(hash) % filterSize);
             if (!filter.get(index)) {
                 return false;
             }
-            hash = hash + (k);
+            // Create a different hash function
+            s = generateShiftedString(s, k);
+            hash = fnvHash(s);
         }
         return true;
     }
+    
+    public String generateShiftedString(String s, int shift) {
+        StringBuilder shifted = new StringBuilder(s);
+        int originalLength = s.length();
+        while (shift >= originalLength) {
+            // Append the original string again and update the shift
+            shifted.append(s);
+            shift -= originalLength;
+        }
+        if (shift > 0) {
+            // Append the remaining characters from the original string
+            shifted.append(s, 0, shift);
+        }
+        return shifted.toString();
+    }
+
 
     public int filterSize() {
         return setSize * bitsPerElement;
