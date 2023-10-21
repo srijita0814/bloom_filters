@@ -9,20 +9,27 @@ import java.util.Set;
 
 public class BloomDifferential {
 	private BloomFilterRan ranFilter;
+	private BloomFilterRan gramFilter;
+	String filePath;
+	String dbkeysPath;
+	String databasePath;
 
-	public BloomDifferential(String differentialFilePath) {
-         // Create a BloomFilterRan instance
-		createFilter(differentialFilePath);
-        
+	public BloomDifferential(String differentialFilePath, String databaseKeysPath, String dbpath) {
+        this.filePath = differentialFilePath;
+		this.dbkeysPath = databaseKeysPath;
+		this.databasePath = dbpath;
+		this.ranFilter = createFilter(differentialFilePath);
+		this.gramFilter = createFilter(databaseKeysPath);  
     }
 	
-	public void createFilter(String differentialFilePath) {
+	public BloomFilterRan createFilter(String differentialFilePath) {
 		Set<String> differentialKeys = loadDifferentialKeys(differentialFilePath);
-        ranFilter = new BloomFilterRan(differentialKeys.size(), 8);
+		BloomFilterRan ranFilter = new BloomFilterRan(differentialKeys.size(), 8);
 		for (String key : differentialKeys) {
-			//System.out.println(key);
-            ranFilter.add(key); // Add the key to the BloomFilterRan as well
+			key = key.trim();
+            ranFilter.add(key); 
         }
+		return ranFilter;
 	}
 
     private Set<String> loadDifferentialKeys(String filePath) {
@@ -31,10 +38,8 @@ public class BloomDifferential {
             BufferedReader reader = new BufferedReader(new FileReader(filePath));
             String line;
             while ((line = reader.readLine()) != null) {
-                // Assuming each line in the differential file is a key
-            	String[] updatedKey = stringSplit(line);
-            	//System.out.println("Keys here :: " + updatedKey[0]);
-                keys.add(updatedKey[0]);
+                String[] updatedKey = stringSplit(line);
+            	keys.add(updatedKey[0]);
             }
             reader.close();
         } catch (IOException e) {
@@ -46,7 +51,7 @@ public class BloomDifferential {
     public String[] stringSplit(String input) {
     	String[] parts = input.split(" ", 5);
     	List<String> response = new ArrayList<String>();
-    	if (parts.length >= 5) {
+    	if (parts.length >= 4) {
             String part1 = parts[0] + " " + parts[1] + " " + parts[2] + " " + parts[3];
             part1.trim();
             response.add(part1);
@@ -60,10 +65,29 @@ public class BloomDifferential {
     
     public String retrieveRecord(String key) {
         if (ranFilter.appears(key)) {
-        	System.out.println("Record is present");
-            // Consult differential.txt for the record and return it
-            // Add your code to retrieve the record here
-        } else {
+        	//System.out.println("Record is present");
+        	String s = findLineWithSubstring(filePath, key);
+        	if (s != null) {
+        		String[] parts = s.split(" ", 5);
+        		String strValue = parts[0] + " " + parts[1] + " " + parts[2] + " " + parts[3];
+        		strValue = s.substring(strValue.length()).trim();
+        		//System.out.println(strValue);
+        		return strValue;
+        	}
+        } 
+
+        else if (gramFilter.appears(key)) {
+        	String f = findLineWithSubstring(databasePath, key);
+        	if (f != null) {
+        		String[] parts = f.split(" ", 5);
+        		String strValue = parts[0] + " " + parts[1] + " " + parts[2] + " " + parts[3];
+        		strValue = f.substring(strValue.length()).trim();
+        		return strValue;
+        	}
+        		
+        }
+            
+        else {
         	System.out.println("Record is NOT present");
             // Key does not exist in differential.txt; access database.txt directly
             // Add your code to access database.txt here
@@ -71,35 +95,54 @@ public class BloomDifferential {
         return null; // Return null if not found
     }
     
+    public static String findLineWithSubstring(String filePath, String targetSubstring) {
+        String line;
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(targetSubstring)) {
+                    return line;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null; // Substring not found in any file.
+    }
+    
     public static void main(String[] args) {
-    	String filePath = "/Users/srijitachandra/Documents/Sem5/PA1/pa1Data/trial.txt";
-    	//String databaseFilePath = "/Users/srijitachandra/Documents/Sem5/PA1/pa1Data/grams.txt";
-//        int setSize = 1200000;
-//        int bitsPerElement = 8;
-
-        //BloomFilterRan ranFilter = new BloomFilterRan(setSize, bitsPerElement);
-
-          BloomDifferential differential = new BloomDifferential(filePath);
-//          String f = differential.retrieveRecord("ARTICLE_DET 1_NUM Section_NOUN 1_UM");
-//          System.out.println("Appears or not : " + f);
-//        BloomDifferential database = new BloomDifferential();
-//        database.createFilter(databaseFilePath);
+    	String filePath = "./pa1Data/DiffFile.txt";
+    	String dbkeysPath = "./pa1Data/grams.txt";
+    	String databasePath = "./pa1Data/database.txt";
+    	
+        BloomDifferential differential = new BloomDifferential(filePath, dbkeysPath, databasePath);
           
-          String record = "";
-          Set<String> keys = new HashSet<>();
-          keys.add("ARTICLE_DET 1_NUM Section_NOUN 1_NUM");      // This key is present in DiffFile.txt
-          keys.add("Arab agitation . _END_ "); // This key is present in database.txt
-          keys.add("this key not there "); 						  // This key is not present in either of the files
-          keys.add("arts are different species"); 
-          
-          for (String key : keys) {
-        	  key = key.trim();
-          	  record = differential.retrieveRecord(key);
-//          	if (record==null) {
-//              	record = differential.retrieveRecord(key);
-//              }
-          	  System.out.println("Key: " + key + " \nValue is: " + record);
-          }
+        String record = "";
+        Set<String> keys = new HashSet<>();
+        keys.add("are_VERB admirable_ADJ Things_NOUN ,_. ");      // This key is present in DiffFile.txt
+        keys.add("article_NOUN about_ADP the_DET Society_NOUN "); // This key is present in database.txt
+        keys.add("this key not there "); 						  // This key is not present in either of the files
+        keys.add("arts are different species"); 				  // This key is present in DiffFile.txt
+        
+        // Testing Code
+//    	String filePath = "./pa1Data/trial.txt";
+//    	String dbkeysPath = "./pa1Data/difftrialkeys.txt";
+//    	String databasePath = "./pa1Data/difftrial.txt";
+//    
+//        BloomDifferential differential = new BloomDifferential(filePath, dbkeysPath, databasePath);
+//          
+//        String record = "";
+//        Set<String> keys = new HashSet<>();
+//        keys.add("ARTICLE_DET 1_NUM Section_NOUN 1_NUM");      // This key is present in trial.txt
+//        keys.add("Arabs in equal numbers"); 					 // This key is present in difftrialkeys.txt
+//        keys.add("this key not there "); 						 // This key is not present in either of the files
+//        keys.add("Arabs and the Chinese");				     // This key is present in difftrialkeys.txt
+      
+        for (String key : keys) {
+    	    key = key.trim();
+    	    System.out.println("Key: " + key );
+      	    record = differential.retrieveRecord(key);
+      	    System.out.println("Value is: " + record);
+        }
     }
 }
 

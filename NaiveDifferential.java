@@ -6,15 +6,22 @@ import java.util.*;
 
 public class NaiveDifferential {
     private Map<String, String> differentialMap;
+    private Map<String, String> databaseMap;
 
-    public NaiveDifferential(String differentialFilePath) {
+    public NaiveDifferential(String differentialFilePath, String databaseFilePath) {
         differentialMap = loadDifferentialData(differentialFilePath);
+        databaseMap = loadDifferentialData(databaseFilePath);
     }
 
     public String retrieveRecord(String key) {
     	key = key.trim();
     	//System.out.println(key);
-        return differentialMap.get(key);
+    	String keyValue = differentialMap.get(key);
+    	if (keyValue==null) {
+    		keyValue = databaseMap.get(key);
+        }
+        //return differentialMap.get(key);
+    	return keyValue;
     }
     
     public String[] stringSplit(String input) {
@@ -54,11 +61,10 @@ public class NaiveDifferential {
     }
 
     public static void main(String[] args) {
-        String filePath = "/Users/srijitachandra/Documents/Sem5/PA1/pa1Data/DiffFile.txt";
-        String databaseFilePath = "/Users/srijitachandra/Documents/Sem5/PA1/pa1Data/database.txt";
+        String filePath = "./pa1Data/DiffFile.txt";
+        String databaseFilePath = "./pa1Data/database.txt";
 
-        NaiveDifferential naive = new NaiveDifferential(filePath);
-        NaiveDifferential database = new NaiveDifferential(databaseFilePath);
+        NaiveDifferential naive = new NaiveDifferential(filePath, databaseFilePath);
 
         String record = "";
         Set<String> keys = new HashSet<>();
@@ -67,11 +73,23 @@ public class NaiveDifferential {
         keys.add("this key not there "); 						  // This key is not present in either of the files
         keys.add("arts are different species"); 				  // This key is present in DiffFile.txt
         
+    	// Testing code
+//    	  String filePath = "./pa1Data/trial.txt";
+//        String databaseFilePath = "./pa1Data/difftrial.txt";
+//
+//        NaiveDifferential naive = new NaiveDifferential(filePath, databaseFilePath);
+//        //NaiveDifferential database = new NaiveDifferential(databaseFilePath);
+//
+//        String record = "";
+//        Set<String> keys = new HashSet<>();
+//        keys.add("ARTICLE_DET 1_NUM Section_NOUN 1_NUM");        // This key is present in trial.txt
+//        keys.add("Arabs in equal numbers"); 					 // This key is present in difftrial.txt
+//        keys.add("this key not there "); 						 // This key is not present in either of the files
+//        keys.add("Arabs and the Chinese");						 // This key is present in difftrial.txt
+    	
+    	
         for (String key : keys) {
         	record = naive.retrieveRecord(key);
-        	if (record==null) {
-            	record = database.retrieveRecord(key);
-            }
         	System.out.println("Key: " + key + " is: " + record);
         }
         
