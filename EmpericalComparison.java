@@ -74,32 +74,32 @@ public class EmpericalComparison {
         return sampleQueries;
     }
 	
-	public static int naiveNullValues(List<String> testKeys, NaiveDifferential naiveDifferential) {
-        //List<String> falsePositives = new HashSet<>();
-		int nullVal = 0;
-        
-        for (String key : testKeys) {
-            String record = naiveDifferential.retrieveRecord(key);
-            if (record == null) {
-                //falsePositives.add(key);
-            	nullVal++;
-            }
-        }
-        
-        return nullVal;
-    }
+//	public static int naiveNullValues(List<String> testKeys, NaiveDifferential naiveDifferential) {
+//        //List<String> falsePositives = new HashSet<>();
+//		int nullVal = 0;
+//        
+//        for (String key : testKeys) {
+//            String record = naiveDifferential.retrieveRecord(key);
+//            if (record == null) {
+//                //falsePositives.add(key);
+//            	nullVal++;
+//            }
+//        }
+//        
+//        return nullVal;
+//    }
 	
-	private static int testBloomFilter(BloomDifferential bloomFilter, int numTests, List<String> testStrings) {
-        int nullVal = 0;
-        for (String testString: testStrings) {
-        	String val = bloomFilter.retrieveRecord(testString);
-        	//System.out.println(val);
-        	if (val == null) {
-        		nullVal++;
-            }
-        }
-        return nullVal;
-    }
+//	private static int testBloomFilter(BloomDifferential bloomFilter, int numTests, List<String> testStrings) {
+//        int nullVal = 0;
+//        for (String testString: testStrings) {
+//        	String val = bloomFilter.retrieveRecord(testString);
+//        	//System.out.println(val);
+//        	if (val == null) {
+//        		nullVal++;
+//            }
+//        }
+//        return nullVal;
+//    }
 	
 	private static void comparePerformance(BloomDifferential bloomDifferential, NaiveDifferential naiveDifferential, List<String> queries, int numTests) {
         // Measure the time taken for BloomDifferential and NaiveDifferential for each query
@@ -107,15 +107,11 @@ public class EmpericalComparison {
 		long naiveDiffAvgTime = 0;
         for (String query : queries) {
             long startTime = System.nanoTime();
-        	//long startTime = System.currentTimeMillis();
-            bloomDifferential.retrieveRecord(query);
+        	bloomDifferential.retrieveRecord(query);
             long bloomDifferentialTime = System.nanoTime() - startTime;
-            //long bloomDifferentialTime = (System.currentTimeMillis() - startTime);
             bloomDiffAvgTime += bloomDifferentialTime;
-            //System.out.println("bloomDifferentialTime::: " + bloomDifferentialTime);
-
+            
             startTime = System.nanoTime();
-            //startTime = System.currentTimeMillis();
             naiveDifferential.retrieveRecord(query);
             long naiveDifferentialTime = (System.nanoTime() - startTime);
             naiveDiffAvgTime += naiveDifferentialTime;
