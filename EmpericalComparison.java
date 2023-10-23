@@ -13,19 +13,19 @@ public class EmpericalComparison {
 //	}
 
 	public static void main(String[] args) {
-		int numTests = 10;
+		int numTests = 10000;
 		
-		// Initialize BloomDifferential
-        BloomDifferential bloomDifferential = new BloomDifferential("./pa1Data/trial.txt", "./pa1Data/difftrialkeys.txt", "./pa1Data/difftrial.txt");
-
-        // Initialize NaiveDifferential
-        NaiveDifferential naiveDifferential = new NaiveDifferential("./pa1Data/trial.txt", "./pa1Data/difftrial.txt");
+		BloomDifferential bloomDifferential = new BloomDifferential("./pa1Data/DiffFile.txt", "./pa1Data/grams.txt", "./pa1Data/database.txt");
+        NaiveDifferential naiveDifferential = new NaiveDifferential("./pa1Data/DiffFile.txt", "./pa1Data/database.txt");
+        
+		//Testing
+//        BloomDifferential bloomDifferential = new BloomDifferential("./pa1Data/trial.txt", "./pa1Data/difftrialkeys.txt", "./pa1Data/difftrial.txt");
+//        NaiveDifferential naiveDifferential = new NaiveDifferential("./pa1Data/trial.txt", "./pa1Data/difftrial.txt");
 
         // Define sample queries
         //List<String> sampleQueries = generateSampleQueries(sampleQueries);
         List<String> sampleQueries = generateSampleQueries(numTests);
 
-        // Test and compare the performance of both methods
         comparePerformance(bloomDifferential, naiveDifferential, sampleQueries, numTests);
         
 	}
@@ -126,11 +126,11 @@ public class EmpericalComparison {
         System.out.println("Average time Bloom Differential : " + (bloomDiffAvgTime / queries.size()) + ".nanoseconds per query");
         System.out.println("Average time Naive Differential : " + (naiveDiffAvgTime / queries.size()) + ".nanoseconds per query");
         
-        int ndNulValues = naiveNullValues(queries, naiveDifferential);
-        System.out.println("Naive Differential Null Values : " + ndNulValues);
-        
-        int bdNulValues = testBloomFilter(bloomDifferential, numTests, queries);
-        System.out.println("Bloom Differential Null Values : " + bdNulValues);
+//        int ndNulValues = naiveNullValues(queries, naiveDifferential);
+//        System.out.println("Naive Differential Null Values : " + ndNulValues);
+//        
+//        int bdNulValues = testBloomFilter(bloomDifferential, numTests, queries);
+//        System.out.println("Bloom Differential Null Values : " + bdNulValues);
     }
 
 }

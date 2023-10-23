@@ -6,11 +6,13 @@ import java.util.*;
 
 public class NaiveDifferential {
     private Map<String, String> differentialMap;
-    private Map<String, String> databaseMap;
+    //private Map<String, String> databaseMap;
+    private String databasePath;
 
     public NaiveDifferential(String differentialFilePath, String databaseFilePath) {
         differentialMap = loadDifferentialData(differentialFilePath);
-        databaseMap = loadDifferentialData(databaseFilePath);
+        //databaseMap = loadDifferentialData(databaseFilePath);
+        this.databasePath = databaseFilePath;
     }
 
     public String retrieveRecord(String key) {
@@ -18,10 +20,25 @@ public class NaiveDifferential {
     	//System.out.println(key);
     	String keyValue = differentialMap.get(key);
     	if (keyValue==null) {
-    		keyValue = databaseMap.get(key);
+    		//keyValue = databaseMap.get(key);
+    		keyValue = findLineWithSubstring(databasePath, key);
         }
         //return differentialMap.get(key);
     	return keyValue;
+    }
+    
+    public static String findLineWithSubstring(String filePath, String targetSubstring) {
+        String line;
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(targetSubstring)) {
+                    return line;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null; // Substring not found in any file.
     }
     
     public String[] stringSplit(String input) {

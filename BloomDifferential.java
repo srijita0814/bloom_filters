@@ -88,9 +88,8 @@ public class BloomDifferential {
         }
             
         else {
-        	System.out.println("Record is NOT present");
-            // Key does not exist in differential.txt; access database.txt directly
-            // Add your code to access database.txt here
+        	//System.out.println("Record is NOT present");
+        	return null; 
         }
         return null; // Return null if not found
     }
